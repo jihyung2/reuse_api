@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// 가정, 위성에서 보낸 데이터 $(시작) %(종료) 기호로 구분하기
+// 가정, 위성에서 보낸 데이터 $(시작) %(종료) 기호로 구분하기ㅁㅇㅁㅇ
 // Map은 key와 value의 쌍으로 이루어진 데이터의 집합이다.
 // Key 값을 String, value값을 Object형으로 put 메소드를 통해 입력가능
 @RestController
