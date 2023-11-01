@@ -1,5 +1,6 @@
 package com.example.reuse_api.controller;
 
+import com.example.reuse_api.service.DBService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,8 @@ import java.util.Map;
 // Key 값을 String, value값을 Object형으로 put 메소드를 통해 입력가능
 @RestController
 public class restapi {
+    private DBService dbService;
+
     @PostMapping("/sensor")
     public String sensorData(@RequestBody SatelliteData data) throws IOException {
         String satelliteId = data.getName();
@@ -33,6 +36,8 @@ public class restapi {
 
         boolean firstPart = true;
 
+        SatelliteData data2 = new SatelliteData();
+
         for (String part : dataPart) {
             if (firstPart) {
                 // 맨 처음 부분은 공백 처리
@@ -49,13 +54,15 @@ public class restapi {
 
                 sensorDataInfo.put(sensorName, processedDataValue);
 
+                data2.setName(sensorName);
+                data2.setData(sensorValue);
+                dbService.saveDB(data2);
+
                 // 다음 센서 이름을 기다림
                 sensorName = null;
             }
 
         }
-        System.out.println(sensorDataInfo);
-
 
         return sensorDataInfo.toString();
     }

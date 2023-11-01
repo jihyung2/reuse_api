@@ -1,8 +1,22 @@
 package com.example.reuse_api.controller;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "sd1000u")
 public class SatelliteData {
+    @Id
+    @Column(name="name")
     private String name;
+    @Column(name = "data")
     private String data;
+
+    public SatelliteData() {
+
+    }
 
     public String getName(){return name;}
     public void setName(String name) {
