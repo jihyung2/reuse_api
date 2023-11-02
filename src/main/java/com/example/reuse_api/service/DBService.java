@@ -1,13 +1,11 @@
 package com.example.reuse_api.service;
 
-import com.example.reuse_api.controller.SatelliteData;
-import com.example.reuse_api.repository.DBRepository;
+import com.example.reuse_api.entity.SatelliteData;
 import com.example.reuse_api.repository.DBRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

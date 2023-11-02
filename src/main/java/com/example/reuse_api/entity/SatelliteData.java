@@ -1,4 +1,4 @@
-package com.example.reuse_api.controller;
+package com.example.reuse_api.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +32,5 @@ public class SatelliteData {
         this.name = name;
         this.data = data;
     }
-
     // 생성자, getter 및 setter 메서드 추가
 }

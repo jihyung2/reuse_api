@@ -1,14 +1,14 @@
 package com.example.reuse_api.controller;
 
+import com.example.reuse_api.entity.SatelliteData;
 import com.example.reuse_api.service.DBService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 // 가정, 위성에서 보낸 데이터 $(시작) %(종료) 기호로 구분하기ㅁㅇㅁㅇ
@@ -16,6 +16,8 @@ import java.util.Map;
 // Key 값을 String, value값을 Object형으로 put 메소드를 통해 입력가능
 @RestController
 public class restapi {
+
+    @Autowired
     private DBService dbService;
 
     @PostMapping("/sensor")
@@ -54,8 +56,8 @@ public class restapi {
 
                 sensorDataInfo.put(sensorName, processedDataValue);
 
-                data2.setName(sensorName);
-                data2.setData(sensorValue);
+                data2.setData(sensorName);
+                data2.setData(processedDataValue);
                 dbService.saveDB(data2);
 
                 // 다음 센서 이름을 기다림
