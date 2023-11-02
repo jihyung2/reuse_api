@@ -10,12 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-// 가정, 위성에서 보낸 데이터 $(시작) %(종료) 기호로 구분하기ㅁㅇㅁㅇ
+// 가정, 위성에서 보낸 데이터 $(시작) %(종료) 기호로 구분하기
 // Map은 key와 value의 쌍으로 이루어진 데이터의 집합이다.
 // Key 값을 String, value값을 Object형으로 put 메소드를 통해 입력가능
 @RestController
 public class restapi {
+
+    private StringBuilder buffer = new StringBuilder();
+    private SerialDataParser parser = new SerialDataParser();
 
     @Autowired
     private DBService dbService;
@@ -25,49 +30,48 @@ public class restapi {
         String satelliteId = data.getName();
         String streamData = data.getData();
 
-        System.out.println(satelliteId);
-        System.out.println(streamData);
+        processMessage(streamData);
 
-        String[] dataPart = streamData.split("#");
-
-        Map<String, String> sensorDataInfo = new HashMap<>();
-        // 맨처음 #으로 시작되는 부분은 공백처리이므로 맨처음껀 없는데이터임
-        // 그러므로 맨처음부분을 넘기기위해 boolean 처리함
-
-        String sensorName = null;
-
-        boolean firstPart = true;
-
-        SatelliteData data2 = new SatelliteData();
-
-        for (String part : dataPart) {
-            if (firstPart) {
-                // 맨 처음 부분은 공백 처리
-                firstPart = false;
-            } else if (sensorName == null) {
-                // 센서 이름을 설정
-                sensorName = part;
-            } else {
-                // 센서 값을 설정
-                String sensorValue = part;
-
-                //데이터 가공
-                String processedDataValue = DataProcessing.processData(sensorName ,sensorValue);
-
-                sensorDataInfo.put(sensorName, processedDataValue);
-
-                data2.setData(sensorName);
-                data2.setData(processedDataValue);
-                dbService.saveDB(data2);
-
-                // 다음 센서 이름을 기다림
-                sensorName = null;
-            }
-
-        }
-
-        return sensorDataInfo.toString();
+        return "Sensor data processed successfully";
     }
 
+
+    private void processMessage(String message) throws IOException {
+        SatelliteData data2 = new SatelliteData();
+        Map<String, String> sensorData = parser.parseSerialData(message);
+
+        for (String sensorName : sensorData.keySet()) {
+            System.out.println("Sensor Name: " + sensorName + ", Sensor Value: " + sensorData.get(sensorName));
+            data2.setName(sensorName);
+            data2.setData(sensorData.get(sensorName));
+            dbService.saveDB(data2);
+        }
+    }
+
+    public class SerialDataParser {
+        // 센서 데이터를 분석하기위한 정규 표현식, #으로 시작, =로 구분되는 두개의 문자열을 찾아낸다.
+        // 다음 #이나 $이 올때까지 하나의 센서데이터로 본다.
+        private static final String SENSOR_DATA_PATTERN = "#(.*?)=(.*?)(?=#|$)";
+
+        //Pattern.compile 메서드를 이용하여 정규표현식을 컴파일한다. (Pattern은 문자열 데이터를 분석에 사용)
+        private static final Pattern pattern = Pattern.compile(SENSOR_DATA_PATTERN);
+
+        public Map<String, String> parseSerialData(String data) throws IOException {
+            Map<String, String> sensorData = new HashMap<>();
+            //Pattern의 matcher메서드를 사용해 문자열에 데이터에 대한 Matcher 객체생성
+            // MATCHER 객체는 문자열 데이터에서 정규 표현식에 맞는 부분을 찾는데 사용
+            // Pattern.compile로 학습시키고 matcher로 찾는거임 (group(1), group(2)) 사용
+            Matcher matcher = pattern.matcher(data);
+            while (matcher.find()) {
+                String sensorName = matcher.group(1);
+                String sensorValue = matcher.group(2);
+
+                String processedDataValue = DataProcessing.processData(sensorName ,sensorValue);
+                sensorData.put(sensorName, processedDataValue);
+            }
+
+            return sensorData;
+        }
+    }
 
 }
