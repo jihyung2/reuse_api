@@ -212,3 +212,11 @@ GET, POST 방식을 둘다 사용한 이유로는 WebClient를 사용하여 JSON
 GET 요청으로 JSON 데이터를 직접 전송하는 것은 일반적으로 권장되지 않습니다. 
 
 **백엔드 서버에 코드자체를 다 넣지 않고 파일을 여러개로 분산해서 개발하면 좋을듯
+
+
+
+
+
+### 데이터의 예시를 
+$(데이터의 시작), &(데이터의 끝), #(센서데이터 구분)=(센서값)
+$#sensor1.Analog=abca#sensor.2Binary=baba#sensor3.Image=avav&
