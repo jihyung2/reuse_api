@@ -48,25 +48,15 @@ public class restapi {
 
         for (String sensorName : sensorData.keySet()) {
             System.out.println("Sensor Name: " + sensorName + ", Sensor Value: " + sensorData.get(sensorName));
-
-            // 데이터베이스에서 해당 센서 이름으로 SatelliteData 엔티티를 찾습니다.
-            SatelliteData satelliteData = dbService.findByName(sensorName);
-
-            // 해당 센서 이름으로 SatelliteData 엔티티가 없을 경우, 새로운 엔티티를 생성하고 저장합니다.
-            if (satelliteData == null) {
-                satelliteData = new SatelliteData();
-                satelliteData.setName(sensorName);
-                dbService.saveDB(satelliteData);
-            }
-
-            // 새로운 AllStoreData 엔티티를 생성하고 저장합니다.
             AllStoreData allStoreData = new AllStoreData();
-            allStoreData.setSatelliteData(satelliteData);
+
+            //SateliteData는 데이터베이스를 새로 구조짤때 사용해야할듯 - 로그인 기능으로 사용자의 고유 id값이 생긴경우 사용
+
+            allStoreData.setName(sensorName);
             allStoreData.setData(sensorData.get(sensorName));
             allService.saveAllDB(allStoreData);
         }
     }
-
     public class SerialDataParser {
         // 센서 데이터를 분석하기위한 정규 표현식, #으로 시작, =로 구분되는 두개의 문자열을 찾아낸다.
         // 다음 #이나 $이 올때까지 하나의 센서데이터로 본다.

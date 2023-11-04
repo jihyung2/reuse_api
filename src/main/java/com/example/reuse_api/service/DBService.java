@@ -29,6 +29,18 @@ public class DBService {
         entityManager.flush();
         entityManager.clear();
     }
+
+    @Transactional
+    public SatelliteData findByNameOrCreate(String sensorName) {
+        SatelliteData satelliteData = this.findByName(sensorName);
+        if (satelliteData == null) {
+            satelliteData = new SatelliteData();
+            satelliteData.setName(sensorName);
+            this.saveDB(satelliteData);
+        }
+        return satelliteData;
+    }
+
     public List<SatelliteData> getALLDB() {
         return dbRepository.findAll();
     }

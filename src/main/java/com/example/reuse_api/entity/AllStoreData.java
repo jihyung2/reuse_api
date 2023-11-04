@@ -13,9 +13,12 @@ public class AllStoreData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "satellite_name", referencedColumnName = "name")
-    private SatelliteData satelliteData;
+//    @ManyToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "satellite_name", referencedColumnName = "name")
+//    private SatelliteData satelliteData;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "data")
     private String data;
@@ -24,9 +27,9 @@ public class AllStoreData {
     private String timestamp;
 
 
-    public AllStoreData(SatelliteData satelliteDat, String data) {
-        //this.name = name;
-        this.satelliteData = satelliteDat;
+    public AllStoreData(String name, String data) {
+        this.name = name;
+        //this.satelliteData = satelliteDat;
         this.data = data;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         this.timestamp = dateFormat.format(new Date());
@@ -57,11 +60,15 @@ public class AllStoreData {
         this.timestamp = timestamp;
     }
 
-    public SatelliteData getSatelliteData() {
-        return satelliteData;
+    public String getName(){return name;}
+    public void setName(String name) {
+        this.name = name;
     }
-
-    public void setSatelliteData(SatelliteData satelliteData) {
-        this.satelliteData = satelliteData;
-    }
+//    public SatelliteData getSatelliteData() {
+//        return satelliteData;
+//    }
+//
+//    public void setSatelliteData(SatelliteData satelliteData) {
+//        this.satelliteData = satelliteData;
+//    }
 }

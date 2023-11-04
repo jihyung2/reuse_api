@@ -5,8 +5,10 @@ import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 
 public class DataProcessing {
     public static String processData(String sensorName, String sensorValue) throws IOException {
@@ -26,15 +28,17 @@ public class DataProcessing {
                     System.err.println("바이너리 데이터 가공 실패: " + e.getMessage());
                     return null;
                 }
-
+            //시리얼 통신을 통해 이미지를 전송하려면, 먼저 이미지를 바이트 배열로 변환해야 합니다.
+            // 그리고 이 바이트 배열을 시리얼 통신을 통해 전송하고, 수신 측에서는 이 바이트 배열을 다시 이미지로 복원해야 합니다.
             } else if (dataType.equals("Image")) {
                 try {
                     byte[] imageBytes = java.util.Base64.getDecoder().decode(sensorValue);
                     BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                    File outputFile = new File("output_image.png");
-                    ImageIO.write(image, "png", outputFile);
+                    File outputFile = new File("../image_server/"+parts[0]+".jpeg");
+                    ImageIO.write(image, "jpeg", outputFile); // 받은 파일을 이미지로 복원 후 저장
+                    String storelocation = outputFile.getAbsolutePath(); // 이미지 파일의 절대 경로를 얻습니다.
+                    return storelocation;
 
-                    return image.toString();
                 } catch (IllegalArgumentException | IOException e) {
                 // 디코딩 또는 이미지 처리 중에 오류가 발생한 경우 처리
                     System.err.println("이미지 데이터 가공 실패:" + e.getMessage());
