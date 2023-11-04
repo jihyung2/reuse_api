@@ -1,6 +1,9 @@
 package com.example.reuse_api.controller;
 
+import com.example.reuse_api.entity.AllStoreData;
+import com.example.reuse_api.entity.getsetdata;
 import com.example.reuse_api.entity.SatelliteData;
+import com.example.reuse_api.service.AllService;
 import com.example.reuse_api.service.DBService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +28,11 @@ public class restapi {
     @Autowired
     private DBService dbService;
 
+    @Autowired
+    private AllService allService;
+
     @PostMapping("/sensor")
-    public String sensorData(@RequestBody SatelliteData data) throws IOException {
+    public String sensorData(@RequestBody getsetdata data) throws IOException {
         String satelliteId = data.getName();
         String streamData = data.getData();
 
@@ -36,15 +42,28 @@ public class restapi {
     }
 
 
+
     private void processMessage(String message) throws IOException {
-        SatelliteData data2 = new SatelliteData();
         Map<String, String> sensorData = parser.parseSerialData(message);
 
         for (String sensorName : sensorData.keySet()) {
             System.out.println("Sensor Name: " + sensorName + ", Sensor Value: " + sensorData.get(sensorName));
-            data2.setName(sensorName);
-            data2.setData(sensorData.get(sensorName));
-            dbService.saveDB(data2);
+
+            // 데이터베이스에서 해당 센서 이름으로 SatelliteData 엔티티를 찾습니다.
+            SatelliteData satelliteData = dbService.findByName(sensorName);
+
+            // 해당 센서 이름으로 SatelliteData 엔티티가 없을 경우, 새로운 엔티티를 생성하고 저장합니다.
+            if (satelliteData == null) {
+                satelliteData = new SatelliteData();
+                satelliteData.setName(sensorName);
+                dbService.saveDB(satelliteData);
+            }
+
+            // 새로운 AllStoreData 엔티티를 생성하고 저장합니다.
+            AllStoreData allStoreData = new AllStoreData();
+            allStoreData.setSatelliteData(satelliteData);
+            allStoreData.setData(sensorData.get(sensorName));
+            allService.saveAllDB(allStoreData);
         }
     }
 

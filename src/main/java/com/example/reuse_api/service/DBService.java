@@ -2,6 +2,8 @@ package com.example.reuse_api.service;
 
 import com.example.reuse_api.entity.SatelliteData;
 import com.example.reuse_api.repository.DBRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -12,16 +14,21 @@ import java.util.List;
 public class DBService {
 
     private final DBRepository dbRepository;
-
+    private final EntityManager entityManager;
     @Autowired
-    public DBService(DBRepository dbRepository) {
+    public DBService(DBRepository dbRepository, EntityManager entityManager) {
         this.dbRepository = dbRepository;
+        this.entityManager = entityManager;
     }
-
-    public SatelliteData saveDB(SatelliteData storedata) {
-        return dbRepository.save(storedata);
+    @Transactional //@Transactional 어노테이션이 없었기 때문에, EntityManager의 merge 메서드가 트랜잭션 외부에서 호출되서 에러가 발생함
+    public void saveDB(SatelliteData satelliteData) {
+        entityManager.merge(satelliteData);
     }
-
+    @Transactional
+    public void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
+    }
     public List<SatelliteData> getALLDB() {
         return dbRepository.findAll();
     }
@@ -34,5 +41,13 @@ public class DBService {
         dbRepository.deleteAll(deleteProblems); // 찾은 이름과 연결된 정보를 다 지운다.
 
         return deleteProblems;
+    }
+
+    public SatelliteData findByName(String sensorName) {
+        List<SatelliteData> results = dbRepository.findByName(sensorName);
+        if (!results.isEmpty()) {
+            return results.get(0);
+        }
+        return null;
     }
 }
