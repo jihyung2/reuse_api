@@ -28,7 +28,7 @@ public class DataProcessing {
                     System.err.println("바이너리 데이터 가공 실패: " + e.getMessage());
                     return null;
                 }
-            //시리얼 통신을 통해 이미지를 전송하려면, 먼저 이미지를 바이트 배열로 변환해야 합니다.
+            // 시리얼 통신을 통해 이미지를 전송하려면, 먼저 이미지를 바이트 배열로 변환해야 합니다.
             // 그리고 이 바이트 배열을 시리얼 통신을 통해 전송하고, 수신 측에서는 이 바이트 배열을 다시 이미지로 복원해야 합니다.
             } else if (dataType.equals("Image")) {
                 try {
@@ -54,7 +54,7 @@ public class DataProcessing {
                 // String Builer는 문자열을 연결해줌
                 StringBuilder resultBuilder = new StringBuilder();
                 for (String part : Ascii) {
-                    int asciiValue = Integer.parseInt(part); //(아스키코드)문자열로 표현된 숫자를 정수로 변환
+                    int asciiValue = Integer.parseInt(part); // (아스키코드)문자열로 표현된 숫자를 정수로 변환
                     char character = (char) asciiValue; // char 캐스팅 연산자를 사용하여 정수값을 해당하는 ASCII 문자로 변환
                     resultBuilder.append(character);
                 }

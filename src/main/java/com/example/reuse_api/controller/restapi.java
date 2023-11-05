@@ -62,12 +62,12 @@ public class restapi {
         // 다음 #이나 $이 올때까지 하나의 센서데이터로 본다.
         private static final String SENSOR_DATA_PATTERN = "#(.*?)=(.*?)(?=#|$)";
 
-        //Pattern.compile 메서드를 이용하여 정규표현식을 컴파일한다. (Pattern은 문자열 데이터를 분석에 사용)
+        // Pattern.compile 메서드를 이용하여 정규표현식을 컴파일한다. (Pattern은 문자열 데이터를 분석에 사용)
         private static final Pattern pattern = Pattern.compile(SENSOR_DATA_PATTERN);
 
         public Map<String, String> parseSerialData(String data) throws IOException {
             Map<String, String> sensorData = new HashMap<>();
-            //Pattern의 matcher메서드를 사용해 문자열에 데이터에 대한 Matcher 객체생성
+            // Pattern의 matcher메서드를 사용해 문자열에 데이터에 대한 Matcher 객체생성
             // MATCHER 객체는 문자열 데이터에서 정규 표현식에 맞는 부분을 찾는데 사용
             // Pattern.compile로 학습시키고 matcher로 찾는거임 (group(1), group(2)) 사용
             Matcher matcher = pattern.matcher(data);
