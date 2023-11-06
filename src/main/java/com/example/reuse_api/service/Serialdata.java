@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Service
 public class Serialdata {
-    private static final String SERIAL_PORT = "/dev/cu.usbserial-A10NLRGZ";
+    private static final String SERIAL_PORT = "/dev/cu.usbserial-A10NLRJC";
     private static final String REST_API_SERVER = "http://127.0.0.1:8080/sensor";
     private static final int MAX_RETRY_COUNT = 5;
     private static final int RETRY_DELAY_MS = 2000;
@@ -46,16 +46,16 @@ public class Serialdata {
     }
 
     private void readFromSerialPort() throws Exception {
-//        SerialPort serialPort = SerialPort.getCommPort(SERIAL_PORT);
-//        serialPort.openPort();
-//        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-//        System.out.println("Serial Communication Success!");
-//
-//        while (true) {
-//            if (serialPort.bytesAvailable() > 0) {
-//                processDataFromSerialPort(serialPort);
-//            }
-//        }
+        SerialPort serialPort = SerialPort.getCommPort(SERIAL_PORT);
+        serialPort.openPort();
+        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+        System.out.println("Serial Communication Success!");
+
+        while (true) {
+            if (serialPort.bytesAvailable() > 0) {
+                processDataFromSerialPort(serialPort);
+            }
+        }
     }
 
     private void processDataFromSerialPort(SerialPort serialPort) throws Exception {

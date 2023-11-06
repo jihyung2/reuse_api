@@ -34,7 +34,7 @@ public class DataProcessing {
                 try {
                     byte[] imageBytes = java.util.Base64.getDecoder().decode(sensorValue);
                     BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                    File outputFile = new File("../image_server/"+parts[0]+".jpeg");
+                    File outputFile = new File("/Users/shinheegwan/Documents/reuse_api/"+parts[0]+".jpeg");
                     ImageIO.write(image, "jpeg", outputFile); // 받은 파일을 이미지로 복원 후 저장
                     // 이미지 파일을 바이트 배열로 변환한 값을 스트링 형태로 저장하려면, 바이트 배열을 Base64 인코딩하여
                     // 문자열로 변환해야함, *Base64 -> 바이트 데이터를 ASCII 문자열로 변환하는 방법

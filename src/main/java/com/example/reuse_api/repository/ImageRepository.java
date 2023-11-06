@@ -1,10 +1,12 @@
 package com.example.reuse_api.repository;
 
-import com.example.reuse_api.entity.AllStoreData;
 import com.example.reuse_api.entity.ImageData;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
 
-@Repository
-public interface ImageRepository extends JpaRepository<ImageData, String> {
+import java.util.List;
+
+public interface ImageRepository extends JpaRepository<ImageData, Long> {
+    @Query("SELECT id FROM ImageData ")
+    List<Long> findAllIds();
 }
