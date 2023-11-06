@@ -461,20 +461,14 @@
                             <!-- Card Header - Dropdown -->
                             <div
                                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                                <div class="dropdown no-arrow">
-                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                                         aria-labelledby="dropdownMenuLink">
-                                        <div class="dropdown-header">Dropdown Header:</div>
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                    </div>
+                                <h6 class="m-0 font-weight-bold text-primary">Data Graph</h6>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Dropdown button
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <!-- Here, the list items will be added dynamically. -->
+                                    </ul>
                                 </div>
                             </div>
                             <!-- Card Body -->
@@ -624,6 +618,86 @@
 <script src="js/demo/chart-area-demo.js"></script>
 <script src="js/demo/chart-pie-demo.js"></script>
 <script src="js/demo/datatables-demo.js"></script>
+
+<!-- Graph JavaScript -->
+<script>
+    var chart;  // 차트 인스턴스를 저장할 변수 선언
+
+    $.ajax({
+        url: "/getDataTable",
+        method: "GET",
+        success: function(data) {
+            var sensorNames = [...new Set(data.map(function(item) {
+                return item.name;
+            }))];
+
+            var dropdownMenu = document.querySelector('.dropdown-menu');
+            sensorNames.forEach(function(name) {
+                var button = document.createElement('button');
+                button.className = 'dropdown-item';
+                button.type = 'button';
+                button.textContent = name;
+                dropdownMenu.appendChild(button);
+            });
+
+            var dropdownMenuItems = document.querySelectorAll('.dropdown-item');
+
+            // 드롭다운 메뉴가 생성된 후 첫 번째 항목을 클릭
+            if (dropdownMenuItems.length > 0) {
+                dropdownMenuItems[0].click();
+            }
+
+            dropdownMenuItems.forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    var sensorName = e.target.textContent;
+
+                    var sensorData = data.filter(function(item) {
+                        return item.name === sensorName;
+                    }).map(function(item) {
+                        return Number(item.data); // 문자열을 숫자로 변환
+                    });
+
+                    var sensorTimestamps = data.filter(function(item) {
+                        return item.name === sensorName;
+                    }).map(function(item) {
+                        return item.timestamp; // 타임스탬프 데이터 추출
+                    });
+
+                    var ctx = document.getElementById('myAreaChart').getContext('2d');
+
+                    // 이전 차트가 있으면 업데이트, 없으면 새로 생성
+                    if (chart) {
+                        chart.data.labels = sensorTimestamps; // x축 레이블을 타임스탬프 데이터로 설정
+                        chart.data.datasets[0].data = sensorData;
+                        chart.data.datasets[0].label = sensorName + ' Data';
+                        chart.update();
+                    } else {
+                        chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: sensorTimestamps, // x축 레이블을 타임스탬프 데이터로 설정
+                                datasets: [{
+                                    label: sensorName + ' Data',
+                                    data: sensorData,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)'
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    });
+
+</script>
 
 <!-- DataTable JavaScript -->
 <script src="vendor/datatables/jquery.dataTables.min.js"></script>
