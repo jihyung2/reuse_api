@@ -46,16 +46,16 @@ public class Serialdata {
     }
 
     private void readFromSerialPort() throws Exception {
-//        SerialPort serialPort = SerialPort.getCommPort(SERIAL_PORT);
-//        serialPort.openPort();
-//        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-//        System.out.println("Serial Communication Success!");
-//
-//        while (true) {
-//            if (serialPort.bytesAvailable() > 0) {
-//                processDataFromSerialPort(serialPort);
-//            }
-//        }
+        SerialPort serialPort = SerialPort.getCommPort(SERIAL_PORT);
+        serialPort.openPort();
+        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+        System.out.println("Serial Communication Success!");
+
+        while (true) {
+            if (serialPort.bytesAvailable() > 0) {
+                processDataFromSerialPort(serialPort);
+            }
+        }
     }
 
     private void processDataFromSerialPort(SerialPort serialPort) throws Exception {

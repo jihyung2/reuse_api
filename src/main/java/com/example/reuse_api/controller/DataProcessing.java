@@ -36,8 +36,16 @@ public class DataProcessing {
                     BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
                     File outputFile = new File("../image_server/"+parts[0]+".jpeg");
                     ImageIO.write(image, "jpeg", outputFile); // 받은 파일을 이미지로 복원 후 저장
-                    String storelocation = outputFile.getAbsolutePath(); // 이미지 파일의 절대 경로를 얻습니다.
-                    return storelocation;
+                    // 이미지 파일을 바이트 배열로 변환한 값을 스트링 형태로 저장하려면, 바이트 배열을 Base64 인코딩하여
+                    // 문자열로 변환해야함, *Base64 -> 바이트 데이터를 ASCII 문자열로 변환하는 방법
+                    String imageString = Base64.getEncoder().encodeToString(imageBytes);
+
+                    //문자열을 데이터베이스에 저장하고
+                    // Base64 인코딩된 문자열을 다시 이미지로 변환하려면
+                    //  byte[] imageBytes = Base64.getDecoder().decode(imageString);
+                    //  BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+                    //  이렇게 다시 디코더 하면된다.
+                    return imageString;
 
                 } catch (IllegalArgumentException | IOException e) {
                 // 디코딩 또는 이미지 처리 중에 오류가 발생한 경우 처리
@@ -47,6 +55,8 @@ public class DataProcessing {
             }
 
             } else if (dataType.equals("String")) {
+                // 이부분에 나중에 온도센서 등 올바른 스트링 처리하는 코드 넣어야함
+                // Ex) 전압 값은 A*5.0/1024.0 을 계산해야함
                 return sensorValue;
             }
             else if (dataType.equals("ASCII")) {
