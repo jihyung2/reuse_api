@@ -3,6 +3,7 @@
 
 <head>
     <style>
+
         .dropdown-menu2 {
             display: none;
             position: absolute;
@@ -623,6 +624,24 @@
 <script>
     var chart; // 전역 변수로 선언
 
+    // 페이지 로드 시 첫 번째 센서의 데이터를 이용하여 그래프를 그리는 코드
+    $(document).ready(function() {
+        $.ajax({
+            url: "/getDataTable",
+            method: "GET",
+            success: function (data) {
+                var sensorNames = [...new Set(data.map(function (item) {
+                    return item.name;
+                }))];
+
+                // 페이지 로딩 시 첫 번째 센서를 기반으로 그래프를 그립니다.
+                if (sensorNames.length > 0) {
+                    drawGraph(data, sensorNames[0]);
+                }
+            }
+        });
+    });
+
     function abc() {
         $.ajax({
             url: "/getDataTable",
@@ -656,74 +675,100 @@
                 dropdownMenuItems.forEach(function (item) {
                     item.addEventListener('click', function (e) {
                         var sensorName = e.target.textContent;
-
-                        var sensorData = data.filter(function (item) {
-                            return item.name === sensorName;
-                        }).map(function (item) {
-                            return Number(item.data); // 문자열을 숫자로 변환
-                        });
-
-                        var sensorTimestamps = data.filter(function (item) {
-                            return item.name === sensorName;
-                        }).map(function (item) {
-                            return item.timestamp; // 타임스탬프 데이터 추출
-                        });
-
-                        var ctx = document.getElementById('myAreaChart').getContext('2d');
-
-                        // 이전 차트가 있으면 업데이트, 없으면 새로 생성
-                        if (chart) {
-                            chart.data.labels = sensorTimestamps; // x축 레이블을 타임스탬프 데이터로 설정
-                            chart.data.datasets[0].data = sensorData;
-                            chart.data.datasets[0].label = sensorName + ' Data';
-                            chart.update();
-                        } else {
-                            chart = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: sensorTimestamps, // x축 레이블을 타임스탬프 데이터로 설정
-                                    datasets: [{
-                                        label: sensorName + ' Data',
-                                        data: sensorData,
-                                        borderColor: 'rgba(75, 192, 192, 1)',
-                                        backgroundColor: 'rgba(75, 192, 192, 0.2)'
-                                    }]
-                                },
-                                options: {
-                                    scales: {
-                                        y: {
-                                            beginAtZero: true
-                                        }
-                                    }
-                                }
-                            });
-                        }
+                        drawGraph(data, sensorName);
                     });
                 });
             }
         });
     }
+
+    function drawGraph(data, sensorName) {
+        var sensorData = data.filter(function (item) {
+            return item.name === sensorName;
+        }).map(function (item) {
+            return Number(item.data); // 문자열을 숫자로 변환
+        });
+
+        var sensorTimestamps = data.filter(function (item) {
+            return item.name === sensorName;
+        }).map(function (item) {
+            return item.timestamp; // 타임스탬프 데이터 추출
+        });
+
+        var ctx = document.getElementById('myAreaChart').getContext('2d');
+
+        // 이전 차트가 있으면 업데이트, 없으면 새로 생성
+        if (chart) {
+            chart.data.labels = sensorTimestamps; // x축 레이블을 타임스탬프 데이터로 설정
+            chart.data.datasets[0].data = sensorData;
+            chart.data.datasets[0].label = sensorName + ' Data';
+            chart.update();
+        } else {
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sensorTimestamps, // x축 레이블을 타임스탬프 데이터로 설정
+                    datasets: [{
+                        label: sensorName + ' Data',
+                        data: sensorData,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+
 </script>
 
 <script>
     $(document).ready(function() {
-        $.get("/image-ids", function(imageIds) {
-            var carouselInner = $(".carousel-inner");
+        var imageIds = [];
+        var currentIndex = 0;
 
-            imageIds.forEach(function(id, index) {
+        function loadImage(index) {
+            if (index < 0 || index >= imageIds.length) {
+                return;
+            }
+
+            $.get("/image/" + imageIds[index], function(data) {
                 var img = new Image();
-                img.src = "/image/" + id;
+                img.src = "data:image/jpeg;base64," + data; // 이미지 데이터를 Base64로 인코딩하여 src에 설정합니다.
                 img.className = "d-block w-100";
                 img.alt = "Slide " + (index + 1);
 
                 var carouselItem = document.createElement("div");
-                carouselItem.className = "carousel-item" + (index == 0 ? " active" : "");
+                carouselItem.className = "carousel-item" + (index == currentIndex ? " active" : "");
                 carouselItem.appendChild(img);
 
-                carouselInner.append(carouselItem);
+                $(".carousel-inner").empty().append(carouselItem);
             });
+        }
+
+        $.get("/image-ids", function(data) {
+            imageIds = data;
+            loadImage(currentIndex);
+        });
+
+        $(".carousel-control-prev").click(function() {
+            currentIndex = (currentIndex - 1 + imageIds.length) % imageIds.length;
+            loadImage(currentIndex);
+        });
+
+        $(".carousel-control-next").click(function() {
+            currentIndex = (currentIndex + 1) % imageIds.length;
+            loadImage(currentIndex);
         });
     });
+
 </script>
 
 <!-- DataTable JavaScript -->
@@ -761,7 +806,8 @@
                     createNewTable(data);  // 테이블 파괴 후 새 테이블 생성
                 }, 0);
             } else {
-                createNewTable(data);  // 처음 실행 시 테이블 생성
+                createNewTable(data);
+                // 처음 실행 시 테이블 생성
             }
         }
     });

@@ -27,8 +27,9 @@ public class ImageService {
         return imageRepository.findAll();
     }
 
-    public Optional<ImageData> getImageData(Long id) {
-        return imageRepository.findById(id);
+    public ImageData getImageData(Long id) {
+        Optional<ImageData> imageDataOptional = imageRepository.findById(id);
+        return imageDataOptional.orElse(null);
     }
 
     public List<Long> getAllImageIds() {
