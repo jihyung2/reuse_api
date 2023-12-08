@@ -36,8 +36,6 @@
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-
 </head>
 
 <body id="page-top">
@@ -272,6 +270,7 @@
                     </div>
                 </div>
 
+
                 <!-- DataTales Example -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
@@ -354,7 +353,6 @@
 <script>
     var chart; // 전역 변수로 선언
 
-    // 페이지 로드 시 첫 번째 센서의 데이터를 이용하여 그래프를 그리는 코드
     $(document).ready(function () {
         $.ajax({
             url: "/getDataTable",
@@ -385,80 +383,111 @@
                 dropdownMenu.innerHTML = ''; // 이전에 생성된 메뉴 항목을 제거
 
                 sensorNames.forEach(function (name) {
-                    var button = document.createElement('button');
-                    button.className = 'dropdown-item';
-                    button.type = 'button';
-                    button.textContent = name;
-                    dropdownMenu.appendChild(button);
+                    var div = document.createElement('div');
+                    div.className = 'form-check dropdown-item';
+
+                    var input = document.createElement('input');
+                    input.className = 'form-check-input';
+                    input.type = 'checkbox';
+                    input.id = 'check-' + name;
+                    input.dataset.name = name;
+
+                    var label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.htmlFor = 'check-' + name;
+                    label.textContent = name;
+
+                    div.appendChild(input);
+                    div.appendChild(label);
+
+                    dropdownMenu.appendChild(div);
                 });
 
-                var dropdownMenuItems = document.querySelectorAll('.dropdown-item');
+                var checkboxes = document.querySelectorAll('.form-check-input');
 
-                dropdownMenuItems.forEach(function (item) {
-                    item.addEventListener('click', function (e) {
-                        var sensorName = e.target.textContent;
-                        drawGraph(data, sensorName);
+                checkboxes.forEach(function (checkbox) {
+                    checkbox.addEventListener('change', function (e) {
+                        var selectedNames = Array.from(checkboxes)
+                            .filter(function (checkbox) {
+                                return checkbox.checked;
+                            })
+                            .map(function (checkbox) {
+                                return checkbox.dataset.name;
+                            });
+
+                        drawGraph(data, selectedNames);
                     });
                 });
             }
         });
     }
 
-    function drawGraph(data, sensorName) {
-        var sensorData = data.filter(function (item) {
-            return item.name === sensorName;
-        }).map(function (item) {
-            return Number(item.data); // 문자열을 숫자로 변환
+    function drawGraph(data, sensorNames) {
+        if (!Array.isArray(sensorNames)) {
+            sensorNames = [sensorNames];
+        }
+
+        var datasets = sensorNames.map(function (sensorName, index) {
+            var sensorData = data.filter(function (item) {
+                return item.name === sensorName;
+            }).map(function (item) {
+                return Number(item.data); // 문자열을 숫자로 변환
+            });
+
+            // 무작위 색상 생성
+            var color = 'rgba(' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', 1)';
+
+            return {
+                label: sensorName + ' Data',
+                data: sensorData,
+                borderColor: color, // 생성한 무작위 색상 사용
+                fill: false // 선 그래프 아래 영역을 채우지 않음
+            };
         });
 
         var sensorTimestamps = data.filter(function (item) {
-            return item.name === sensorName;
+            return sensorNames.includes(item.name);
         }).map(function (item) {
             var date = new Date(item.timestamp);
             return date.toLocaleTimeString(); // 시, 분, 초만 표시
         });
+        // x축이 계속 늘어나서 중복 제거
+        sensorTimestamps = Array.from(new Set(sensorTimestamps));
 
         var ctx = document.getElementById('myAreaChart').getContext('2d');
 
-        // 이전 차트가 있으면 업데이트, 없으면 새로 생성
+        // 이전 차트가 있으면 삭제하고 새로 생성
         if (chart) {
-            chart.data.labels = sensorTimestamps; // x축 레이블을 타임스탬프 데이터로 설정
-            chart.data.datasets[0].data = sensorData;
-            chart.data.datasets[0].label = sensorName + ' Data';
-            chart.update();
-        } else {
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: sensorTimestamps, // x축 레이블을 타임스탬프 데이터로 설정
-                    datasets: [{
-                        label: sensorName + ' Data',
-                        data: sensorData,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'second',
-                                displayFormats: {
-                                    second: 'HH:mm:ss'
-                                }
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: sensorTimestamps, // x축 레이블을 타임스탬프 데이터로 설정
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
                             }
-                        },
-                        y: {
-                            beginAtZero: true
                         }
+                    },
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
-        }
+            }
+        });
     }
+
 </script>
 
 
@@ -508,11 +537,6 @@
 <!-- DataTable JavaScript -->
 <script src="vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-<!-- DataTables Buttons plugin and JSZip library -->
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
 
 <!-- SheetJS library -->
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
