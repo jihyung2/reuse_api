@@ -22,40 +22,40 @@ public class Serialdata {
 
     private StringBuilder buffer = new StringBuilder();
 
-    public void readSerialData() {
-        int retryCount = 0;
-        while (true) {
-            try {
-                readFromSerialPort();
-                break;
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Failed to connect to the serial port. Retrying...");
-                retryCount++;
-                if (retryCount > MAX_RETRY_COUNT) {
-                    System.out.println("Failed to connect to the serial port after " + MAX_RETRY_COUNT + " attempts. Please check the connection.");
-                    break;
-                }
-                try {
-                    Thread.sleep(RETRY_DELAY_MS);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void readFromSerialPort() throws Exception {
-//        SerialPort serialPort = SerialPort.getCommPort(SERIAL_PORT);
-//        serialPort.openPort();
-//        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-//        System.out.println("Serial Communication Success!");
-//
+//    public void readSerialData() {
+//        int retryCount = 0;
 //        while (true) {
-//            if (serialPort.bytesAvailable() > 0) {
-//                processDataFromSerialPort(serialPort);
+//            try {
+//                readFromSerialPort();
+//                break;
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                System.out.println("Failed to connect to the serial port. Retrying...");
+//                retryCount++;
+//                if (retryCount > MAX_RETRY_COUNT) {
+//                    System.out.println("Failed to connect to the serial port after " + MAX_RETRY_COUNT + " attempts. Please check the connection.");
+//                    break;
+//                }
+//                try {
+//                    Thread.sleep(RETRY_DELAY_MS);
+//                } catch (InterruptedException ie) {
+//                    ie.printStackTrace();
+//                }
 //            }
 //        }
+//    }
+
+    private void readFromSerialPort() throws Exception {
+        SerialPort serialPort = SerialPort.getCommPort(SERIAL_PORT);
+        serialPort.openPort();
+        serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+        System.out.println("Serial Communication Success!");
+
+        while (true) {
+            if (serialPort.bytesAvailable() > 0) {
+                processDataFromSerialPort(serialPort);
+            }
+        }
     }
 
     private void processDataFromSerialPort(SerialPort serialPort) throws Exception {

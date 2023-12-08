@@ -24,7 +24,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Dashboard</title>
+    <title>Cansat Monitoring</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -35,6 +35,8 @@
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
 </head>
 
@@ -276,6 +278,10 @@
                         <div style="display: flex; align-items: center;">
                             <i class="bi bi-table text-primary" style="margin-right: 5px;"></i>
                             <h6 class="m-0 font-weight-bold text-primary">Data Tables</h6>
+                            <a href="#" id="exportButton" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
+                               style="margin-left: auto;">
+                                <i class="fas fa-download fa-sm text-white-50"></i> Export
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">
@@ -502,6 +508,15 @@
 <!-- DataTable JavaScript -->
 <script src="vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- DataTables Buttons plugin and JSZip library -->
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+
+<!-- SheetJS library -->
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
 <script>
     // 새로운 테이블을 생성하는 함수
     function createNewTable(data) {
@@ -539,6 +554,34 @@
             }
         }
     });
+
+    $("#exportButton").on("click", function(event) {
+        event.preventDefault();
+
+        var table = $('#dataTable').DataTable();
+        var data = [];
+        var headers = [];
+        table.columns().header().each(function(header) {
+            headers.push($(header).text());
+        });
+        data.push(headers);
+
+        table.rows().every(function () {
+            var row = this.data();
+            data.push(Object.values(row));
+        });
+        var ws = XLSX.utils.aoa_to_sheet(data);
+
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+        var date = new Date();
+        var timestamp = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, '0') + date.getDate().toString().padStart(2, '0') + "_" + date.getHours().toString().padStart(2, '0') + date.getMinutes().toString().padStart(2, '0') + date.getSeconds().toString().padStart(2, '0');
+        var fileName = timestamp + '_DataTable.xlsx';
+
+        XLSX.writeFile(wb, fileName);
+    });
+
 </script>
 
 </body>

@@ -13,8 +13,8 @@ public class SerialDataScheduler {
         this.serialdata = serialdata;
     }
 
-    @Scheduled(fixedRate = 1000) // 1초마다 실행
-    public void readSerialDataPeriodically() {
-        serialdata.readSerialData();
-    }
+//    @Scheduled(fixedRate = 1000) // 1초마다 실행
+//    public void readSerialDataPeriodically() {
+//        serialdata.readSerialData();
+//    }
 }
